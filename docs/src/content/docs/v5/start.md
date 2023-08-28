@@ -1,0 +1,68 @@
+---
+title: Nikcio.UHeadless.Creation Documentation - Version 5.0.0+
+description: Welcome to Version 5 of the Nikcio.UHeadless.Creation documentation! This documentation aims to provide you with comprehensive resources to help you get started and make the most out of the Nikcio.UHeadless.Creation package.
+---
+
+Welcome to the documentation for Nikcio.UHeadless.Creation Version 5.0.0! This documentation aims to provide you with comprehensive resources to help you get started and make the most out of the Nikcio.UHeadless.Creation package. Whether you're new to the package or looking to extend its functionality, we've got you covered.
+
+## Fundamentals
+
+In this section, you will find essential information about Nikcio.UHeadless.Creation and its core concepts.
+
+### Getting Started
+- [Getting started](../fundamentals/getting-started): Find step-by-step instructions on how to install Nikcio.UHeadless.Creation and get started.
+  - [Querying content](../fundamentals/querying/content): Explore the query options for content.
+  - [Querying media](../fundamentals/querying/media): Explore the query options for media.
+  - [Querying members](../fundamentals/querying/members): Explore the query options for members.
+  - [Querying properties](../fundamentals/querying/content): Discover how to query properties on content, media and members.
+- [Extending Nikcio.UHeadless](../fundamentals/extend-uheadless): Learn how to extend and customize Nikcio.UHeadless.Creation to fit your specific requirements.
+
+## Extending Nikcio.UHeadless
+
+This section focuses on extending Nikcio.UHeadless.Creation to tailor it to your project's needs. It covers different areas where you can extend Nikcio.UHeadless.Creation, including content, media, members, integrations, and properties.
+
+### Content
+
+- [Extending Content](../extending/content): Learn how to extend the existing content model and how build your own in Nikcio.UHeadless.Creation.
+
+### Media
+
+- [Extending Media](../extending/media): Discover how to extend the existing media model and how build your own in Nikcio.UHeadless.Creation.
+
+### Members
+
+- [Extending Members](../extending/member): Learn how to extend the existing member model and how build your own in Nikcio.UHeadless.Creation.
+
+### Integrations
+
+- [Skybrud Redirects](../extending/integrations/redirects/skybrud-redirects): Explore how to integrate Nikcio.UHeadless.Creation with [Skybrud Redirects](https://marketplace.umbraco.com/package/skybrud.umbraco.redirects) for enhanced functionality.
+
+:::note
+This section is not written yet.
+:::
+
+### Properties
+
+- [Overview of Properties](../extending/properties/overview): Get an overview of the different property types and their usage in Nikcio.UHeadless.Creation.
+- [Block List](../extending/properties/block-list): Discover how to extend the block list property model in Nikcio.UHeadless.Creation.
+- [Custom Editor](../extending/properties/custom-editor): Learn how to use custom property editors in Nikcio.UHeadless.Creation.
+- [Media Picker](../extending/properties/media-picker): Explore how to extend the media picker property model in Nikcio.UHeadless.Creation.
+- [Rich Text](../extending/properties/rich-text): Learn how to extend the rich text property model in Nikcio.UHeadless.Creation.
+
+## Reference
+
+In the reference section, you will find detailed information about various aspects of Nikcio.UHeadless, including options, content, media, members, and properties.
+
+- [Options](../reference/options): Learn about the options available for configuring Nikcio.UHeadless.Creation.
+- [Content Reference](../reference/content/overview): Find reference documentation for working with content in Nikcio.UHeadless.Creation.
+- [Media Reference](../reference/media/overview): Find reference documentation for working with media in Nikcio.UHeadless.Creation.
+- [Members Reference](../reference/members/overview): Find reference documentation for working with members in Nikcio.UHeadless.Creation.
+- [Properties Reference](../reference/properties/overview): Find reference documentation for working with properties in Nikcio.UHeadless.Creation.
+
+We hope this documentation helps you make the most out of Nikcio.UHeadless. If you have any questions or need further assistance, don't hesitate to reach out to us.
+
+**Enjoy building with Nikcio.UHeadless.Creation!**
+
+---
+
+For those interested in supporting the development of Nikcio.UHeadless.Creation, consider becoming a sponsor on [GitHub Sponsors](https://github.com/sponsors/nikcio/). Your sponsorship helps us continue to improve and maintain this package. Thank you for your support!

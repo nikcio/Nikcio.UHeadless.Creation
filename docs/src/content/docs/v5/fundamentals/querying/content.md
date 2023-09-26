@@ -3,226 +3,95 @@ title: Content Queries
 description: Learn how to query content in Nikcio.UHeadless.Creation.
 ---
 
-The Nikcio.UHeadless.Creation package provides various content queries that allow you to retrieve content items in different ways from Umbraco CMS. These queries are divided into two variations: "Basic" and "Auth" queries.
+The Nikcio.UHeadless.Creation package exposes a new service called `IContentRepository<TContent>` this repository can be found in the `Nikcio.UHeadless.Content.Repositories` namespace. This service is what you'll use to create your content model based on any `IPublishedContent`.
 
-## Basic Queries
+# What is `TContent`
 
-The "Basic" queries do not require authorization and provide unrestricted access to CMS data. Use the following code example to add a basic content query to the UHeadless options:
+TContent is the content model you have created for your content. The only restriction is that the model must implement the `IContent` interface. See the `ContentDocumentModel` in the [Nikcio.UHeadless.Creation.Models.Example](https://github.com/nikcio/Nikcio.UHeadless/tree/v5/contrib/src/Nikcio.UHeadless.Creation.Models.Example) for more information.
 
-```csharp
-.AddUHeadless(new()
-{
-    UHeadlessGraphQLOptions = new()
-    {
-        GraphQLExtensions = (IRequestExecutorBuilder builder) =>
-        {
-            builder.UseContentQueries();  
-            builder.AddTypeExtension<BasicContentAllQuery>();
-            return builder;
-        },
-    },
-})
-```
+# Methods
 
-**Do note that adding the code above will override the defaults and remove the `contentAtRoot` query. To use the `contentAtRoot` query, you need to add the `BasicContentAtRootQuery` to the options.**
+The service has two important methods:
 
-The following basic content queries are available:
+## GetContent
 
-| Query class Name                            | Description                                                         |
-|---------------------------------------------|---------------------------------------------------------------------|
-| BasicContentAllQuery                        | Gets all the content items available.                               |
-| BasicContentAtRootQuery                     | Gets all the content items at the root level.                       |
-| BasicContentByAbsoluteRouteQuery            | Gets a content item by an absolute route.                           |
-| BasicContentByContentTypeQuery              | Gets all the content items by content type.                         |
-| BasicContentByGuidQuery                     | Gets a content item by GUID.                                        |
-| BasicContentByIdQuery                       | Gets a content item by ID.                                          |
-| BasicContentByTagQuery                      | Gets content items by tag.                                          |
-| BasicContentDescendantsByAbsoluteRouteQuery | Gets content item descendants by an absolute route.                 |
-| BasicContentDescendantsByContentTypeQuery   | Gets all descendants of content items with a specific content type. |
-| BasicContentDescendantsByGuidQuery          | Gets descendants on a content item selected by GUID.                |
-| BasicContentDescendantsByIdQuery            | Gets descendants on a content item selected by ID.                  |
+The `GetContent` method gets one content model from one IPublishedContent model.
 
-You can explore these queries and their parameters in the UI provided at `/graphql` when you have added them to the `UHeadlessGraphQLOptions.GraphQLExtensions` like in the example above.
+The first argument in the method is an action where you can fetch an IPublishedContent from the `IPublishedContentCache` provided by Umbraco.
 
-## Auth Queries
-
-The "Auth" queries require authentication when querying data. "Auth" queries are "Basic" queries that have been overridden and added the `[Authorize]` attribute from `using HotChocolate.Authorization`. Use the following code example to add an authenticated content query to the UHeadless options:
+### Examples
 
 ```csharp
-.AddUHeadless(new()
+private readonly IContentRepository<ContentDocumentModel> contentRepository;
+
+ctor(IContentRepository<ContentDocumentModel> contentRepository)
 {
-    UHeadlessGraphQLOptions = new()
-    {
-        GraphQLExtensions = (IRequestExecutorBuilder builder) =>
-        {
-            builder.UseContentQueries();  
-            builder.AddTypeExtension<AuthContentAllQuery>();
-            return builder;
-        },
-    },
-})
+    this.contentRepository = contentRepository
+}
+
+private void Example()
+{
+    var contentDocumentModel = contentRepository.GetContent(x => x?.GetById(entity.Id), null, null, null);
+}
 ```
 
-**Do note that adding the code above will override the defaults and remove the `contentAtRoot` query. To use the `contentAtRoot` query, you need to add the `BasicContentAtRootQuery` to the options.**
+This will get an invariant model by id with no segment or fallback property values.
 
-The following authenticated content queries are available:
 
-| Query class Name                            | Description                                                         |
-|---------------------------------------------|---------------------------------------------------------------------|
-| AuthContentAllQuery                         | Gets all the content items available.                               |
-| AuthContentAtRootQuery                      | Gets all the content items at the root level.                       |
-| AuthContentByAbsoluteRouteQuery             | Gets a content item by an absolute route.                           |
-| AuthContentByContentTypeQuery               | Gets all the content items by content type.                         |
-| AuthContentByGuidQuery                      | Gets a content item by GUID.                                        |
-| AuthContentByIdQuery                        | Gets a content item by ID.                                          |
-| AuthContentByTagQuery                       | Gets content items by tag.                                          |
-| AuthContentDescendantsByAbsoluteRouteQuery  | Gets content item descendants by an absolute route.                 |
-| AuthContentDescendantsByContentTypeQuery    | Gets all descendants of content items with a specific content type. |
-| AuthContentDescendantsByGuidQuery           | Gets descendants on a content item selected by GUID.                |
-| AuthContentDescendantsByIdQuery             | Gets descendants on a content item selected by ID.                  |
+```csharp
+private readonly IContentRepository<ContentDocumentModel> contentRepository;
 
-You can explore these queries and their parameters in the UI provided at `/graphql` when you have added them to the `UHeadlessGraphQLOptions.GraphQLExtensions` like in the example above.
+ctor(IContentRepository<ContentDocumentModel> contentRepository)
+{
+    this.contentRepository = contentRepository
+}
 
-## Queries
+private void Example()
+{
+    var contentDocumentModel = contentRepository.GetContent(x =>
+    {
+        IPublishedContent? publishedContent = x?.GetById(false, id);
+        if(!publishedContent?.IsPublished(culture) ?? false)
+        {
+            return null;
+        }
+        return publishedContent;
+    }, culture, null, Fallback.ToLanguage)
+}
+```
 
-_Explore the most up to date information when the query is registered in your application like in the example in the sections above. Then the query information will be available at `/graphql`_
+In this example we get the published model by id and a culture but checks that it's acturally published for the culture we are fetching for before parsing it to the `IContentRepository`. This makes sure that we don't get a content model on an unpublished culture. Lastly we use the Language fallback on the properties if no vaules are found on a property.
 
-### ContentAll
+## GetContentList
 
-Gets all the content items available.
+The `GetContentList` method gets a list content models from a list of IPublishedContent models but otherwise works in a similar fasion.
 
-Parameters:
+The first argument in the method is an action where you can fetch an IPublishedContent from the `IPublishedContentCache` provided by Umbraco.
 
-- **culture**: The culture.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
+### Examples
 
-### ContentAtRoot
+```csharp
+private readonly IContentRepository<ContentDocumentModel> contentRepository;
 
-Gets all the content items at the root level.
+ctor(IContentRepository<ContentDocumentModel> contentRepository)
+{
+    this.contentRepository = contentRepository
+}
 
-Parameters:
+private void Example()
+{
+    var contentDocumentModels = contentRepository.GetContentList(x => x?.GetAtRoot(), null, null, null);
+}
+```
 
-- **culture**: The culture.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
+This will get the content at the root with no segment or fallback property values.
 
-### ContentByAbsoluteRoute
+# Preview values
 
-Gets a content item by an absolute route.
+It's possible to fetch preview values by parsing the parameters to the methods found on the `IPublishedContentCache` (This first argument in the methods).
 
-Parameters:
+# Routing
 
-- **route**: The route to fetch. Example: '/da/frontpage/'.
-- **baseUrl**: The base URL for the request. Example: 'https://localhost:4000'. Default is the current domain.
-- **culture**: The culture.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-- **routeMode**: Modes for requesting by route.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
+It's possible with the `IContentRouter<TContent, TContentRedirect>` to get content by routing which means you can also include any redirect information in your content model.
 
-### ContentByContentType
-
-Gets all the content items by content type.
-
-Parameters:
-
-- **contentType**: The contentType to fetch.
-- **culture**: The culture.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
-
-### ContentByGuid
-
-Gets a content item by GUID.
-
-Parameters:
-
-- **id**: The ID to fetch.
-- **culture**: The culture to fetch.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
-
-### ContentById
-
-Gets a content item by ID.
-
-Parameters:
-
-- **id**: The ID to fetch.
-- **culture**: The culture to fetch.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
-
-### ContentByTag
-
-Gets content items by tag.
-
-Parameters:
-
-- **tag**: The tag to fetch.
-- **tagGroup**: The tag group to fetch.
-- **culture**: The culture to fetch.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
-
-### ContentDescendantsByAbsoluteRoute
-
-Gets content item descendants by an absolute route.
-
-Parameters:
-
-- **route**: The route to fetch. Example: '/da/frontpage/'.
-- **baseUrl**: The base URL for the request. Example: 'https://localhost:4000'. Default is the current domain.
-- **culture**: The culture.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-- **routeMode**: Modes for requesting by
-
- route.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
-
-### ContentDescendantsByContentType
-
-Gets all descendants of content items with a specific content type.
-
-Parameters:
-
-- **contentType**: The contentType to fetch.
-- **culture**: The culture.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
-
-### ContentDescendantsByGuid
-
-Gets descendants of a content item selected by GUID.
-
-Parameters:
-
-- **id**: The ID to fetch.
-- **culture**: The culture to fetch.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
-
-### ContentDescendantsById
-
-Gets descendants of a content item selected by ID.
-
-Parameters:
-
-- **id**: The ID to fetch.
-- **culture**: The culture to fetch.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-- **segment**: The property variation segment.
-- **fallback**: The property value fallback strategy.
-
-## Next steps
-
-When creating your GraphQL queries for media, the properties section can be a little difficult to wrap your head around. Therefore, you can find some documentation about how you can query this here.
-
-- [Building your property query](./properties)
+To use the content router your `TContent` model needs to implement the `IRedirectableEntity<TContentRedirect>` interface.

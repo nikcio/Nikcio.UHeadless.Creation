@@ -9,7 +9,7 @@ Nikcio.UHeadless.Creation supports extensibility through add-on packages, which 
 
 | Add-On Package                            | Description                                              |
 | ----------------------------------------- | -------------------------------------------------------- |
-| Nikcio.UHeadless.Members                  | Adds the ability to query for members and their data     |
+| Nikcio.UHeadless.Creation.Members                  | Adds the ability to query for members and their data     |
 
 ## Installing an Add-On Package
 
@@ -23,10 +23,10 @@ To install an add-on package, follow these steps:
 dotnet add [PackageName]
 ```
 
-Replace `[PackageName]` with the name of the add-on package you want to install. For example, to install the Nikcio.UHeadless.Members add-on package, use the following command:
+Replace `[PackageName]` with the name of the add-on package you want to install. For example, to install the Nikcio.UHeadless.Creation.Members add-on package, use the following command:
 
 ```shell
-dotnet add Nikcio.UHeadless.Members
+dotnet add Nikcio.UHeadless.Creation.Members
 ```
 
 This command will add the specified add-on package to your project and update the project file with the necessary references and dependencies.
@@ -37,4 +37,4 @@ Once you have installed an add-on package, you can start leveraging the addition
 
 | Add-On Package                            | Documentation                                            |
 | ----------------------------------------- | -------------------------------------------------------- |
-| Nikcio.UHeadless.Members                  | [Querying members](./querying/members)  |
+| Nikcio.UHeadless.Creation.Members                  | [Querying members](./querying/members)  |

@@ -3,112 +3,89 @@ title: Media Queries
 description: Learn how to query media in Nikcio.UHeadless.Creation.
 ---
 
-The Nikcio.UHeadless.Creation package provides various media queries that allow you to retrieve media items in different ways from Umbraco CMS. These queries are divided into two variations: "Basic" and "Auth" queries.
+The Nikcio.UHeadless.Creation package exposes a new service called `IMediaRepository<TMedia>` this repository can be found in the `Nikcio.UHeadless.Media.Repositories` namespace. This service is what you'll use to create your Media model based on any `IPublishedContent` (The shared interface for media).
 
-## Basic Queries
+# What is `TMedia`
 
-The "Basic" queries do not require authorization and provide unrestricted access to CMS data. Use the following code example to add a basic media query to the UHeadless options:
+TMedia is the Media model you have created for your Media. The only restriction is that the model must implement the `IMedia` interface. See the `MediaDocumentModel` in the [Nikcio.UHeadless.Creation.Models.Example](https://github.com/nikcio/Nikcio.UHeadless/tree/v5/contrib/src/Nikcio.UHeadless.Creation.Models.Example) for more information.
 
-```csharp
-.AddUHeadless(new()
-{
-    UHeadlessGraphQLOptions = new()
-    {
-        GraphQLExtensions = (IRequestExecutorBuilder builder) =>
-        {
-            builder.UseMediaQueries();  
-            builder.AddTypeExtension<BasicMediaByContentTypeQuery>();
-            return builder;
-        },
-    },
-})
-```
+# Methods
 
-**Do note that adding the code above will override the defaults and remove the `contentAtRoot` query. To use the `contentAtRoot` query, you need to add the `BasicContentAtRootQuery` to the options.**
+The service has two important methods:
 
-The following basic media queries are available:
+## GetMedia
 
-| Query class Name                | Description                                |
-|---------------------------------|--------------------------------------------|
-| BasicMediaAtRootQuery           | Gets all the media items at the root level.|
-| BasicMediaByContentTypeQuery    | Gets all the media items by content type.  |
-| BasicMediaByGuidQuery           | Gets a media item by GUID.                 |
-| BasicMediaByIdQuery             | Gets a media item by ID.                   |
+The `GetMedia` method gets one Media model from one IPublishedMedia model.
 
-You can explore these queries and their parameters in the UI provided at `/graphql` when you have added them to the `UHeadlessGraphQLOptions.GraphQLExtensions` like in the example above.
+The first argument in the method is an action where you can fetch an IPublishedMedia from the `IPublishedMediaCache` provided by Umbraco.
 
-## Auth Queries
-
-The "Auth" queries require authentication when querying data. "Auth" queries are "Basic" queries that have been overridden and added the `[Authorize]` attribute from `using HotChocolate.Authorization`. Use the following code example to add an authenticated media query to the UHeadless options:
+### Examples
 
 ```csharp
-.AddUHeadless(new()
+private readonly IMediaRepository<MediaDocumentModel> MediaRepository;
+
+ctor(IMediaRepository<MediaDocumentModel> MediaRepository)
 {
-    UHeadlessGraphQLOptions = new()
-    {
-        GraphQLExtensions = (IRequestExecutorBuilder builder) =>
-        {
-            builder.UseMediaQueries();  
-            builder.AddTypeExtension<AuthMediaByContentTypeQuery>();
-            return builder;
-        },
-    },
-})
+    this.MediaRepository = MediaRepository
+}
+
+private void Example()
+{
+    var MediaDocumentModel = MediaRepository.GetMedia(x => x?.GetById(entity.Id), null, null, null);
+}
 ```
 
-**Do note that adding the code above will override the defaults and remove the `contentAtRoot` query. To use the `contentAtRoot` query, you need to add the `BasicContentAtRootQuery` to the options.**
+This will get an invariant model by id with no segment or fallback property values.
 
-The following authenticated media queries are available:
 
-| Query class Name              | Description                                  |
-|-------------------------------|----------------------------------------------|
-| AuthMediaAtRootQuery          | Gets all the media items at the root level.  |
-| AuthMediaByContentTypeQuery   | Gets all the media items by content type.    |
-| AuthMediaByGuidQuery          | Gets a media item by GUID.                   |
-| AuthMediaByIdQuery            | Gets a media item by ID.                     |
+```csharp
+private readonly IMediaRepository<MediaDocumentModel> MediaRepository;
 
-You can explore these queries and their parameters in the UI provided at `/graphql` when you have added them to the `UHeadlessGraphQLOptions.GraphQLExtensions` like in the example above.
+ctor(IMediaRepository<MediaDocumentModel> MediaRepository)
+{
+    this.MediaRepository = MediaRepository
+}
 
-## Queries
+private void Example()
+{
+    var MediaDocumentModel = MediaRepository.GetMedia(x =>
+    {
+        IPublishedMedia? publishedMedia = x?.GetById(false, id);
+        if(!publishedMedia?.IsPublished(culture) ?? false)
+        {
+            return null;
+        }
+        return publishedMedia;
+    }, culture, null, Fallback.ToLanguage)
+}
+```
 
-_Explore the most up-to-date information when the query is registered in your application like in the example in the sections above. Then the query information will be available at `/graphql`_
+In this example we get the published model by id and a culture but checks that it's acturally published for the culture we are fetching for before parsing it to the `IMediaRepository`. This makes sure that we don't get a Media model on an unpublished culture. Lastly we use the Language fallback on the properties if no vaules are found on a property.
 
-### MediaAtRoot
+## GetMediaList
 
-Gets all the media items at the root level.
+The `GetMediaList` method gets a list Media models from a list of IPublishedMedia models but otherwise works in a similar fasion.
 
-Parameters:
+The first argument in the method is an action where you can fetch an IPublishedMedia from the `IPublishedMediaCache` provided by Umbraco.
 
-- **preview**: Fetch preview values. Preview will show unpublished items.
+### Examples
 
-### MediaByContentType
+```csharp
+private readonly IMediaRepository<MediaDocumentModel> MediaRepository;
 
-Gets all the media items by content type.
+ctor(IMediaRepository<MediaDocumentModel> MediaRepository)
+{
+    this.MediaRepository = MediaRepository
+}
 
-Parameters:
+private void Example()
+{
+    var MediaDocumentModels = MediaRepository.GetMediaList(x => x?.GetAtRoot(), null, null, null);
+}
+```
 
-- **contentType**: The contentType to fetch.
+This will get the Media at the root with no segment or fallback property values.
 
-### MediaByGuid
+# Preview values
 
-Gets a media item by GUID.
-
-Parameters:
-
-- **id**: The ID to fetch.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-
-### MediaById
-
-Gets a media item by ID.
-
-Parameters:
-
-- **id**: The ID to fetch.
-- **preview**: Fetch preview values. Preview will show unpublished items.
-
-## Next steps
-
-When creating your GraphQL queries for media, the properties section can be a little difficult to wrap your head around. Therefore, you can find some documentation about how you can query this here.
-
-- [Building your property query](./properties)
+It's possible to fetch preview values by parsing the parameters to the methods found on the `IPublishedMediaCache` (This first argument in the methods).
